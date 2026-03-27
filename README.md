@@ -231,27 +231,53 @@ Faites preuve de pédagogie et soyez clair dans vos explications et procedures d
 **Exercice 1 :**  
 Quels sont les composants dont la perte entraîne une perte de données ?  
   
-*..Répondez à cet exercice ici..*
+*
+- Le PVC pra-data (volume de production)
+C'est ici que SQLite stocke toutes les données de l'application en temps réel. Si ce volume est supprimé sans backup récent, toutes les données sont définitivement perdues.2. 
+- Le PVC pra-backup (volume de sauvegarde)
+Si ce volume est perdu en même temps que pra-data, il n'existe plus aucune possibilité de restauration. Les deux PVC étant sur le même cluster, un crash physique de la machine hôte les détruit tous les deux simultanément → SPOF (Single Point of Failure). 
+ - Le CronJob sqlite-backup
+Si le CronJob est suspendu, en erreur ou simplement oublié, les sauvegardes cessent. Le PVC pra-backup devient obsolète et la fenêtre de perte de données (RPO) s'allonge indéfiniment sans que personne ne s'en rende compte.    *
 
 **Exercice 2 :**  
 Expliquez nous pourquoi nous n'avons pas perdu les données lors de la supression du PVC pra-data  
   
-*..Répondez à cet exercice ici..*
+*
+ Parceque le CronJob effectuait une copie de la base SQLite toutes les minutes depuis pra-data vers pra-backup, qui est un volume indépendant et distinct. *
 
 **Exercice 3 :**  
 Quels sont les RTO et RPO de cette solution ?  
   
-*..Répondez à cet exercice ici..*
+*RPO: Le CronJob sauvegarde toutes les 60 secondes. Les données écrites dans la dernière minute avant le sinistre peuvent être perdues
+RTO: La restauration est 100% manuelle : scale down → suppression PVC → recréation → restore job → relance → port-forward → vérification.*
 
 **Exercice 4 :**  
 Pourquoi cette solution (cet atelier) ne peux pas être utilisé dans un vrai environnement de production ? Que manque-t-il ?   
   
-*..Répondez à cet exercice ici..*
+*. 6 raisons majeures
+-  Stockage non répliqué — SPOF physique
+Les deux PVC (pra-data et pra-backup) résident sur le même cluster K3d, sur la même machine physique. Un crash du serveur hôte détruit les deux volumes simultanément. Il n'y a aucune séparation physique entre les données et leur sauvegarde.
+- Aucune sauvegarde off-site
+Aucune copie n'est envoyée vers un stockage externe (S3, NFS distant, autre datacenter). Cela viole la règle 3-2-1 qui est le standard minimal en production :
+
+3 copies des données
+sur 2 supports différents
+dont 1 hors site
+
+- SQLite inadapté à la production
+SQLite est un fichier local mono-thread. Il ne supporte pas la concurrence élevée, ni la réplication native, ni les connexions simultanées massives. Une vraie production utilise PostgreSQL, MySQL ou un service managé (RDS, Cloud SQL).
+- Restauration 100% manuelle
+Il n'existe aucun mécanisme d'auto-remédiation La restauration dépend entièrement d'un humain disponible, compétent et calme sous pression. Cela rend le RTO imprévisible et expose à l'erreur humaine.
+-  Aucun monitoring ni alerting
+Si le CronJob échoue silencieusement, personne n'est prévenu. Les backups peuvent cesser pendant des heures sans qu'aucune alerte ne soit déclenchée. Un backup non surveillé n'est pas fiable.
+-  Aucun test de restauration automatisé
+Un backup qui n'a jamais été testé ne peut pas être considéré comme fiable. En production, les procédures de restauration doivent être testées régulièrement et automatiquement pour s'assurer qu'elles fonctionnent le jour J.*
   
 **Exercice 5 :**  
 Proposez une archtecture plus robuste.   
   
-*..Répondez à cet exercice ici..*
+*..                              .*
+
 
 ---------------------------------------------------
 Séquence 6 : Ateliers  
