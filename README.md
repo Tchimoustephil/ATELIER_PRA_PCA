@@ -242,8 +242,7 @@ Si le CronJob est suspendu, en erreur ou simplement oublié, les sauvegardes ces
 **Exercice 2 :**  
 Expliquez nous pourquoi nous n'avons pas perdu les données lors de la supression du PVC pra-data  
   
-*
- Parceque le CronJob effectuait une copie de la base SQLite toutes les minutes depuis pra-data vers pra-backup, qui est un volume indépendant et distinct. *
+* Parceque le CronJob effectuait une copie de la base SQLite toutes les minutes depuis pra-data vers pra-backup, qui est un volume indépendant et distinct. *
 
 **Exercice 3 :**  
 Quels sont les RTO et RPO de cette solution ?  
@@ -276,10 +275,8 @@ Un backup qui n'a jamais été testé ne peut pas être considéré comme fiable
 **Exercice 5 :**  
 Proposez une archtecture plus robuste.   
   
-*..                              .*
+*..     voir le fichier architecture robuste proposé                          .*
 
-
----------------------------------------------------
 Séquence 6 : Ateliers  
 Difficulté : Moyenne (~2 heures)
 ---------------------------------------------------
