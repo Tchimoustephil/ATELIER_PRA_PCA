@@ -5,7 +5,7 @@ L’idée en 30 secondes : Cet atelier met en œuvre un **mini-PRA** sur **Kuber
   
 **Architecture cible :** Ci-dessous, voici l'architecture cible souhaitée.   
   
-![Screenshot Actions](Architecture_cible.png)  
+![Screenshot Actions](Architecturerobusteproposé.png)  
   
 -------------------------------------------------------------------------------------------------------
 Séquence 1 : Codespace de Github
